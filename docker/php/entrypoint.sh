@@ -1,0 +1,39 @@
+#!/bin/bash
+set -e
+
+# Wait for MySQL to be ready
+if [ "$DB_CONNECTION" = "mysql" ]; then
+    echo "Waiting for database..."
+    while ! nc -z $DB_HOST $DB_PORT; do
+      sleep 1
+    done
+    echo "Database is up!"
+fi
+
+# Install dependencies if vendor is missing
+if [ ! -d "vendor" ]; then
+    echo "Installing composer dependencies..."
+    composer install --no-interaction --optimize-autoloader --no-dev
+fi
+
+# Set permissions
+echo "Setting permissions..."
+mkdir -p storage/framework/{sessions,views,cache}
+mkdir -p storage/logs
+mkdir -p bootstrap/cache
+
+# Run migrations if enabled
+if [ "$RUN_MIGRATIONS" = "true" ]; then
+    echo "Running migrations..."
+    php artisan migrate --force
+fi
+
+# Optimization for production
+if [ "$APP_ENV" = "production" ]; then
+    echo "Caching configuration and routes..."
+    php artisan config:cache
+    php artisan route:cache
+    php artisan view:cache
+fi
+
+exec "$@"
