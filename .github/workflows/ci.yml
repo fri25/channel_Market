@@ -67,7 +67,7 @@ jobs:
     - name: NPM Audit (JS Security)
       run: |
         npm install
-        npm audit --audit-level=high
+        npm audit --audit-level=moderate
 
     - name: Local Secret Scan (Basic)
       run: |
