@@ -1,59 +1,248 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Channel Market — Marketplace de Produits Numériques
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="300" alt="Laravel Logo">
 </p>
 
-## About Laravel
+Application de marketplace pour la vente de produits numériques (PDF, vidéos, musiques, etc.) avec paiement intégré via **Moneroo** (XOF / FCFA) et téléchargement sécurisé par token.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Stack Technique
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Technologie    | Version                 |
+| -------------- | ----------------------- |
+| PHP            | ^8.2                    |
+| Laravel        | ^12.0                   |
+| Laravel Breeze | ^2.4 (authentification) |
+| Tailwind CSS   | ^3.1 + Vite             |
+| AlpineJS       | ^3.4                    |
+| Moneroo        | ^0.2.0 (paiement)       |
+| MySQL          | 5.7+ / 8.0              |
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Fonctionnalités
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Côté Client
 
-## Laravel Sponsors
+- **Catalogue de produits** — Liste des produits numériques avec page détail
+- **Checkout & Paiement** — Formulaire (email, prénom, nom, téléphone) puis redirection vers Moneroo
+- **Téléchargement sécurisé** — Lien unique à usage unique via token UUID par commande
+- **Historique d'achats** — Dashboard client avec liste des commandes payées
+- **Authentification** — Inscription, connexion, gestion de profil (Laravel Breeze)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Côté Admin
 
-### Premium Partners
+- **CRUD Produits** — Création, modification, suppression des produits (titre, description, prix, fichier, image)
+- **Gestion des commandes** — Visualisation de toutes les commandes avec statut
+- **Paramètres** — Configuration dynamique via clé/valeur
+- **Middleware `admin`** — Basé sur le champ `is_admin` du modèle User
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### SEO & Technique
 
-## Contributing
+- **Sitemap XML** — Généré dynamiquement à `/sitemap.xml`
+- **Webhook Moneroo** — Vérification HMAC sécurisée des paiements
+- **File d'attente** — Traitement des jobs en base de données
+- **Sessions** — Gérées en base de données
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## Architecture
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Modèles
 
-## Security Vulnerabilities
+| Modèle    | Champs principaux                                                                               |
+| --------- | ----------------------------------------------------------------------------------------------- |
+| `Product` | `title`, `description`, `price`, `file_path`, `image`                                           |
+| `Order`   | `user_id`, `client_email`, `product_id`, `amount`, `status`, `transaction_id`, `download_token` |
+| `User`    | `name`, `email`, `password`, `is_admin`                                                         |
+| `Setting` | `key`, `value`                                                                                  |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Routes Principales
 
-## License
+| Méthode    | Route                            | Description                   |
+| ---------- | -------------------------------- | ----------------------------- |
+| `GET`      | `/`                              | Catalogue des produits        |
+| `GET`      | `/product/{product}`             | Détail d'un produit           |
+| `GET/POST` | `/checkout/{product}`            | Page de paiement              |
+| `GET`      | `/dashboard`                     | Espace client (authentifié)   |
+| `GET`      | `/download/{token}`              | Téléchargement sécurisé       |
+| `GET`      | `/payment/success/{order}`       | Page de succès après paiement |
+| `GET`      | `/sitemap.xml`                   | Sitemap SEO                   |
+| `GET`      | `/admin/products`                | Liste des produits (admin)    |
+| `GET/POST` | `/admin/products/create`         | Créer un produit (admin)      |
+| `GET/PUT`  | `/admin/products/{product}/edit` | Modifier un produit (admin)   |
+| `GET`      | `/admin/orders`                  | Liste des commandes (admin)   |
+| `GET/POST` | `/admin/settings`                | Paramètres (admin)            |
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## Prérequis
+
+- PHP >= 8.2 avec les extensions : `pdo_mysql`, `mbstring`, `openssl`, `json`, `fileinfo`
+- Composer
+- Node.js >= 18 + npm
+- MySQL 5.7+ ou 8.0
+- Un compte [Moneroo](https://moneroo.io) avec clé API (mode test ou live)
+
+---
+
+## Installation
+
+### 1. Cloner le projet
+
+```bash
+git clone https://github.com/digitaleflex/channel_Market.git
+cd channel_Market
+```
+
+### 2. Installer les dépendances
+
+```bash
+composer install
+npm install
+```
+
+### 3. Configuration de l'environnement
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+Modifiez le fichier `.env` avec vos paramètres :
+
+```env
+APP_NAME="Channel Market"
+APP_URL=http://localhost:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=produit_digitaux
+DB_USERNAME=root
+DB_PASSWORD=votre_mot_de_passe
+
+# Moneroo (obligatoire pour les paiements)
+MONEROO_SECRET_KEY=votre_cle_secrete_moneroo
+MONEROO_WEBHOOK_SECRET=votre_cle_webhook_moneroo
+```
+
+### 4. Créer la base de données
+
+```bash
+mysql -u root -p -e "CREATE DATABASE produit_digitaux CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+
+### 5. Exécuter les migrations
+
+```bash
+php artisan migrate
+```
+
+### 6. Créer un administrateur
+
+```bash
+php artisan tinker
+```
+
+Puis dans Tinker :
+
+```php
+\App\Models\User::create([
+    'name' => 'Admin',
+    'email' => 'admin@example.com',
+    'password' => bcrypt('password'),
+    'is_admin' => true,
+]);
+exit
+```
+
+### 7. Compiler les assets
+
+```bash
+npm run build
+```
+
+### 8. Lancer l'application
+
+```bash
+composer run dev
+```
+
+Ou manuellement :
+
+```bash
+php artisan serve
+npm run dev   # dans un autre terminal
+```
+
+Accédez à l'application sur [http://localhost:8000](http://localhost:8000)
+
+---
+
+## Commandes Utiles
+
+| Commande                   | Description                                                       |
+| -------------------------- | ----------------------------------------------------------------- |
+| `composer run setup`       | Installation complète (dépendances, .env, clé, migrations, build) |
+| `composer run dev`         | Lancer le serveur + queue + logs + Vite en parallèle              |
+| `composer run test`        | Exécuter les tests PHPUnit                                        |
+| `php artisan serve`        | Lancer le serveur de développement                                |
+| `npm run dev`              | Compiler les assets en mode watch                                 |
+| `npm run build`            | Compiler les assets pour la production                            |
+| `php artisan queue:listen` | Traiter les jobs en file d'attente                                |
+
+---
+
+## Configuration Moneroo
+
+1. Créez un compte sur [moneroo.io](https://moneroo.io)
+2. Récupérez votre **Secret Key** dans le tableau de bord
+3. Configurez un **Webhook** pointant vers `https://votredomaine.com/payment/moneroo/webhook`
+4. Copiez la **Webhook Secret** dans votre `.env`
+
+> Le webhook est optionnel mais recommandé : il garantit la mise à jour fiable du statut des commandes même si le client ferme la page de retour Moneroo.
+
+---
+
+## Structure des Répertoires Clés
+
+```
+channel_Market/
+├── app/
+│   ├── Http/Controllers/
+│   │   ├── ProductController.php      # Catalogue + CRUD admin
+│   │   ├── PaymentController.php      # Checkout, Moneroo, webhook
+│   │   ├── OrderController.php        # Gestion commandes admin
+│   │   ├── DownloadController.php     # Téléchargement sécurisé
+│   │   ├── SettingController.php      # Paramètres admin
+│   │   └── Auth/                      # Authentification Breeze
+│   └── Models/
+│       ├── Product.php
+│       ├── Order.php
+│       ├── User.php
+│       └── Setting.php
+├── database/migrations/               # Tables users, products, orders, settings
+├── resources/views/                   # Blade templates
+├── routes/
+│   └── web.php                        # Toutes les routes web
+└── config/moneroo.php                 # Configuration Moneroo
+```
+
+---
+
+## Sécurité
+
+- **CSRF** activé sur toutes les routes (sauf webhook Moneroo)
+- **HMAC SHA-256** pour la vérification des webhooks Moneroo
+- **Tokens UUID** uniques pour chaque téléchargement
+- **Middleware `admin`** pour protéger le panel d'administration
+- **Hashage des mots de passe** via Bcrypt
+
+---
+
+## Licence
+
+Ce projet est sous licence [MIT](https://opensource.org/licenses/MIT).
