@@ -38,7 +38,7 @@ class MonitorSystem extends Command
         }
 
         // 3. Envoi de l'alerte si des erreurs sont détectées
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             $message = implode("\n", $errors);
 
             Mail::to(config('mail.from.address'))
@@ -46,7 +46,7 @@ class MonitorSystem extends Command
                 ->bcc('digitaleflex@gmail.com')   // Garde le BCC monitoring
                 ->send(new SystemAlertMail($message, $context));
 
-            $this->error("Problèmes détectés ! Alerte envoyée à digitaleflex@gmail.com");
+            $this->error('Problèmes détectés ! Alerte envoyée à digitaleflex@gmail.com');
         } else {
             $this->info('Système en bonne santé.');
         }

@@ -13,6 +13,7 @@ class SystemAlertMail extends Mailable
     use Queueable, SerializesModels;
 
     public $errorMessage;
+
     public $systemContext;
 
     public function __construct($errorMessage, $systemContext = [])
@@ -24,7 +25,7 @@ class SystemAlertMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '🚨 ALERTE SYSTÈME : ' . config('app.name'),
+            subject: '🚨 ALERTE SYSTÈME : '.config('app.name'),
         );
     }
 
