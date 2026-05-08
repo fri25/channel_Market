@@ -11,6 +11,13 @@ jobs:
     # Note: Pour une dépendance stricte entre fichiers, on utilise workflow_run.
     # Ici, on part du principe que ce workflow est autonome ou déclenché manuellement/après merge.
     steps:
+    - name: Diagnostic réseau (Vérification Connectivité)
+      run: |
+        echo "Tentative de ping vers l'hôte..."
+        ping -c 3 ${{ secrets.VPS_HOST }} || echo "Le serveur ne répond pas au ping (normal si ICMP est bloqué)"
+        echo "Vérification de l'ouverture du port SSH..."
+        nc -zv -w 5 ${{ secrets.VPS_HOST }} ${{ secrets.VPS_SSH_PORT || 22 }} || echo "ERREUR : Le port SSH est FERMÉ ou INACCESSIBLE"
+
     - name: Deploy to VPS via SSH
       uses: appleboy/ssh-action@v1.0.3
       with:
