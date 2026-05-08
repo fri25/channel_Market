@@ -36,10 +36,26 @@ class DatabaseSeeder extends Seeder
 
         Product::create([
             'title' => 'E-Book: Master Laravel 11',
-            'description' => 'A complete guide to building blazing fast web apps with Laravel 11.',
+            'description' => 'Un guide complet pour construire des applications web ultra-rapides avec Laravel 11.',
             'price' => 19.99,
             'file_path' => 'downloads/laravel-11-ebook.pdf',
-            'image' => 'https://via.placeholder.com/400x300.png?text=Laravel+E-Book',
+            'image' => 'https://images.unsplash.com/photo-1544383835-bda2bb66499d?q=80&w=1000&auto=format&fit=crop',
+        ]);
+
+        Product::create([
+            'title' => 'Pack de Scripts Automatisation PHP',
+            'description' => 'Une collection de scripts pour automatiser vos tâches quotidiennes sur serveur Linux.',
+            'price' => 49.00,
+            'file_path' => 'downloads/php-automation-pack.zip',
+            'image' => 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1000&auto=format&fit=crop',
+        ]);
+
+        Product::create([
+            'title' => 'Template Dashboard Premium',
+            'description' => 'Un template de tableau de bord moderne et responsive avec mode sombre inclus.',
+            'price' => 29.50,
+            'file_path' => 'downloads/premium-dashboard.zip',
+            'image' => 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop',
         ]);
     }
 }
