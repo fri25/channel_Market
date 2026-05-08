@@ -47,7 +47,13 @@ jobs:
           # Rechargement de l'infrastructure Docker
           docker compose up -d --build --force-recreate
           
+          # Fix Permissions & Folders
+          docker compose exec -T --user root app mkdir -p storage/framework/views storage/framework/cache storage/framework/sessions bootstrap/cache
+          docker compose exec -T --user root app chmod -R 777 storage bootstrap/cache
+          docker compose exec -T --user root app chown -R www-data:www-data storage bootstrap/cache
+          
           # Optimisations Laravel (exécutées dans le container)
+          docker compose exec -T app php artisan storage:link --force
           docker compose exec -T app php artisan migrate --force
           docker compose exec -T app php artisan db:seed --force
           docker compose exec -T app php artisan config:cache
