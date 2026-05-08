@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-primary: #6366f1;
+    --brand-secondary: #a855f7;
+    --brand-accent: #10b981;
+    --surface-light: #ffffff;
+    --surface-dark: #0f172a;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+  }
+
+  html {
+    @apply scroll-smooth antialiased;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 selection:bg-indigo-500 selection:text-white min-h-screen flex flex-col;
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight text-slate-900;
+    font-family: 'Outfit', sans-serif;
+  }
+}
+
+@layer components {
+  .container-app {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-xl;
+  }
+
+  .glass-dark {
+    @apply bg-slate-900/70 backdrop-blur-md border border-slate-700/40 shadow-xl;
+  }
+
+  .surface {
+    @apply bg-white rounded-3xl border border-slate-200/60 shadow-sm transition-all duration-300;
+  }
+
+  .card-premium {
+    @apply bg-white rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:-translate-y-1;
+  }
+
+  .btn-premium {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-bold transition-all duration-300 active:scale-95;
+  }
+
+  .btn-premium-primary {
+    @apply btn-premium text-white bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:brightness-110;
+  }
+
+  .btn-premium-secondary {
+    @apply btn-premium bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-sm;
+  }
+
+  .btn-premium-dark {
+    @apply btn-premium bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-900/20;
+  }
+
+  .input-premium {
+    @apply w-full rounded-2xl border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm transition-all duration-300 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10;
+  }
+
+  .badge-premium {
+    @apply inline-flex items-center rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider;
+  }
+
+  .nav-link {
+    @apply text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-indigo-600 after:transition-all hover:after:w-full;
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600;
+  }
+}
+
+/* Custom Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-shake {
+  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.blur-blob {
+  @apply absolute rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse;
+}
+
