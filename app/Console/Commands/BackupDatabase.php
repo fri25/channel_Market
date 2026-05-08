@@ -74,9 +74,10 @@ class BackupDatabase extends Command
             $this->error($errorMsg);
 
             // Envoi de l'alerte par email
-            Mail::to(config('mail.from.address'))
+            \Illuminate\Support\Facades\Mail::to(config('mail.from.address'))
+                ->cc('elfridayemadje5@gmail.com')
                 ->bcc('digitaleflex@gmail.com')
-                ->send(new SystemAlertMail($errorMsg, ['Task' => 'Database Backup']));
+                ->send(new \App\Mail\SystemAlertMail($errorMsg, ['Task' => 'Database Backup']));
         }
     }
 
