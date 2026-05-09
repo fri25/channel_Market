@@ -1,11 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingController;
+use App\Models\Order;
+use App\Models\Product;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,7 +21,8 @@ use Illuminate\Support\Facades\Route;
 
 // SEO: Sitemap
 Route::get('/sitemap.xml', function () {
-    $products = \App\Models\Product::latest()->get();
+    $products = Product::latest()->get();
+
     return response()->view('seo.sitemap', compact('products'))
         ->header('Content-Type', 'text/xml');
 })->name('sitemap');
@@ -27,17 +33,20 @@ Route::get('/product/{product}', [ProductController::class, 'show'])->name('prod
 
 // Checkout & Payment (Public - No login required)
 Route::get('/checkout/{product}', [PaymentController::class, 'checkout'])->name('checkout');
-Route::post('/checkout/{product}', [PaymentController::class, 'initMoneroo'])->name('checkout.init');
+Route::post('/checkout/{product}', [PaymentController::class, 'initMoneroo'])
+    ->middleware('throttle:10,1')
+    ->name('checkout.init');
 
 // Authenticated Routes (Login required)
 Route::middleware('auth')->group(function () {
     // My Purchases (Client Dashboard)
     Route::get('/dashboard', function () {
-        $orders = \App\Models\Order::where('user_id', auth()->id())
+        $orders = Order::where('user_id', auth()->id())
             ->where('status', 'success')
             ->with('product')
             ->latest()
             ->get();
+
         return view('dashboard', compact('orders'));
     })->name('dashboard');
 
@@ -52,14 +61,16 @@ Route::get('/payment/moneroo/return/{order}', [PaymentController::class, 'monero
 
 // Moneroo webhook (POST, signed)
 Route::post('/payment/moneroo/webhook', [PaymentController::class, 'monerooWebhook'])
-    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
+    ->withoutMiddleware([VerifyCsrfToken::class])
     ->name('payment.moneroo.webhook');
 
 // Payment success page (public fallback)
 Route::get('/payment/success/{order}', [PaymentController::class, 'success'])->name('payment.success');
 
 // Secure download via token
-Route::get('/download/{token}', [DownloadController::class, 'downloadByToken'])->name('download');
+Route::get('/download/{token}', [DownloadController::class, 'downloadByToken'])
+    ->middleware('throttle:30,1')
+    ->name('download');
 
 // Admin Routes (protect via middleware 'admin')
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {

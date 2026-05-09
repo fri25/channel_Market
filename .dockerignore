@@ -1,0 +1,17 @@
+.git
+.github
+node_modules
+vendor
+storage/logs/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/framework/cache/*
+public/build
+.env
+.env.backup
+phpunit.xml
+tests
+docker-compose.yml
+Dockerfile
+# docker (removed to allow COPY in Dockerfile)
+
