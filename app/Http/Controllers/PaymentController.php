@@ -39,7 +39,7 @@ class PaymentController extends Controller
         $order = Order::create([
             'user_id' => auth()->id(),
             'client_email' => $validated['email'],
-            'client_name' => $validated['first_name'] . ' ' . $validated['last_name'],
+            'client_name' => $validated['first_name'].' '.$validated['last_name'],
             'client_phone' => $validated['phone'],
             'product_id' => $product->id,
             'amount' => $amount,

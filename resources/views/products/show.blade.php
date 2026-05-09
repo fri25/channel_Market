@@ -78,7 +78,7 @@
             <div class="mt-12 surface p-8 md:p-12">
                 <h3 class="text-2xl font-black text-slate-900 mb-6 tracking-tight">Description détaillée</h3>
                 <div class="prose prose-indigo max-w-none text-slate-600 font-medium leading-relaxed">
-                    {{ $product->description }}
+                    {!! $product->description !!}
                 </div>
             </div>
         </div>

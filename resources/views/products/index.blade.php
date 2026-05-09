@@ -67,7 +67,7 @@
                 <div class="p-8 flex flex-col flex-grow">
                     <h3 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-amber-600 transition-colors duration-300 leading-tight">{{ $product->title }}</h3>
                     <p class="text-slate-500 mb-8 line-clamp-2 text-sm leading-relaxed font-medium">
-                        {{ $product->description }}
+                        {{ strip_tags($product->description) }}
                     </p>
                     
                     <div class="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between">

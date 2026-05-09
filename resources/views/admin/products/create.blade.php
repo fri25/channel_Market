@@ -1,4 +1,38 @@
 <x-app-layout>
+    @push('styles')
+        <link rel="stylesheet" type="text/css" href="https://unpkg.com/trix@2.0.8/dist/trix.css">
+        <style>
+            trix-editor {
+                min-height: 250px !important;
+                border-radius: 1.25rem !important;
+                border: 2px solid #f1f5f9 !important;
+                padding: 1.25rem !important;
+                background-color: white !important;
+                color: #1e293b !important;
+                font-family: 'Inter', sans-serif !important;
+                font-weight: 500 !important;
+                line-height: 1.625 !important;
+            }
+            trix-editor:focus {
+                border-color: #6366f1 !important;
+                outline: none !important;
+                box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
+            }
+            trix-toolbar .trix-button-group {
+                border-color: #f1f5f9 !important;
+                margin-bottom: 0.75rem !important;
+            }
+            trix-toolbar .trix-button {
+                border-bottom: none !important;
+            }
+            /* Hide attachment button as we don't have backend logic for it yet */
+            .trix-button--icon-attach { display: none !important; }
+        </style>
+    @endpush
+
+    @push('scripts')
+        <script type="text/javascript" src="https://unpkg.com/trix@2.0.8/dist/trix.umd.min.js"></script>
+    @endpush
     <x-slot name="header">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
@@ -29,7 +63,8 @@
 
                             <div>
                                 <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-3">Description complète</label>
-                                <textarea name="description" rows="6" required class="input-premium resize-none" placeholder="Décrivez votre produit en détail...">{{ old('description') }}</textarea>
+                                <input id="description" type="hidden" name="description" value="{{ old('description') }}">
+                                <trix-editor input="description" class="trix-content" placeholder="Décrivez votre produit en détail..."></trix-editor>
                                 @error('description') <span class="text-rose-500 text-xs font-bold mt-2 block">{{ $message }}</span> @enderror
                             </div>
 
