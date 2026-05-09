@@ -35,10 +35,10 @@ class DownloadController extends Controller
             return redirect()->away($product->file_path);
         }
 
-        if (! $product || ! Storage::exists($product->file_path)) {
+        if (! $product || ! Storage::disk('local')->exists($product->file_path)) {
             abort(404, 'Fichier indisponible');
         }
 
-        return Storage::download($product->file_path);
+        return Storage::disk('local')->download($product->file_path);
     }
 }

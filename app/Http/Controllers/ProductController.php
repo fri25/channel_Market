@@ -61,7 +61,7 @@ class ProductController extends Controller
 
         $filePath = null;
         if ($validated['product_type'] === 'file' && $request->hasFile('file')) {
-            $filePath = $request->file('file')->store('digital_products');
+            $filePath = $request->file('file')->store('digital_products', 'local');
         } else {
             $filePath = $validated['drive_link'];
         }
@@ -107,14 +107,14 @@ class ProductController extends Controller
             if ($request->hasFile('file')) {
                 // Delete old file if it was a local file
                 if ($product->file_path && ! filter_var($product->file_path, FILTER_VALIDATE_URL)) {
-                    Storage::delete($product->file_path);
+                    Storage::disk('local')->delete($product->file_path);
                 }
-                $product->file_path = $request->file('file')->store('digital_products');
+                $product->file_path = $request->file('file')->store('digital_products', 'local');
             }
         } else {
             // It's a link
             if ($product->file_path && ! filter_var($product->file_path, FILTER_VALIDATE_URL)) {
-                Storage::delete($product->file_path);
+                Storage::disk('local')->delete($product->file_path);
             }
             $product->file_path = $validated['drive_link'];
         }
@@ -141,7 +141,14 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        Storage::delete($product->file_path);
+        if ($product->file_path && ! filter_var($product->file_path, FILTER_VALIDATE_URL)) {
+            Storage::disk('local')->delete($product->file_path);
+        }
+        
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
+        }
+
         $product->delete();
 
         return redirect()->route('admin.products.index')->with('success', 'Produit supprimé avec succès !');
