@@ -10,7 +10,12 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        // Désactiver Vite pendant les tests (pas besoin de npm run build)
+        // Désactiver le CSRF pour les tests
+        $this->withoutMiddleware([
+            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+        ]);
+
+        // Désactiver Vite pendant les tests
         $this->withoutVite();
     }
 }
