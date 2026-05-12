@@ -144,7 +144,7 @@ class ProductController extends Controller
         if ($product->file_path && ! filter_var($product->file_path, FILTER_VALIDATE_URL)) {
             Storage::disk('local')->delete($product->file_path);
         }
-        
+
         if ($product->image) {
             Storage::disk('public')->delete($product->image);
         }
