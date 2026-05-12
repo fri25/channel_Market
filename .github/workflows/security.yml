@@ -1,0 +1,40 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+  schedule:
+    - cron: '0 1 * * 1' # Tous les lundis à 1h du matin
+
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+
+    - name: Composer Audit (PHP)
+      run: composer audit
+      continue-on-error: true # Permet de voir les vulnérabilités sans forcément bloquer tout de suite
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: NPM Audit (JS)
+      run: npm audit --audit-level=high
+      continue-on-error: true
+
+    - name: Secret Scan (Gitleaks)
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      continue-on-error: true
