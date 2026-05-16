@@ -2,7 +2,7 @@ name: Deployment
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "main"]
 
 jobs:
   deploy:
@@ -32,11 +32,14 @@ jobs:
           mkdir -p ${{ secrets.VPS_PATH }}
           cd ${{ secrets.VPS_PATH }}
           
-          # Vérifier si c'est un dépôt Git (premier déploiement)
+          # Sauvegarder le commit actuel pour un éventuel rollback
+          PREVIOUS_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "")
+          echo "Dernier commit stable : $PREVIOUS_COMMIT"
+
+          # Mise à jour du code
           if [ ! -d ".git" ]; then
             echo "Premier déploiement : Clonage du projet..."
             git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git .
-            # Sécurité: on retire le token de la configuration git
             git remote set-url origin https://github.com/${{ github.repository }}.git
           else
             echo "Mise à jour du code existant..."
@@ -44,34 +47,51 @@ jobs:
             git reset --hard origin/master
           fi
           
-          # Rechargement de l'infrastructure Docker
-          docker compose up -d --build --force-recreate
+          # Tentative de déploiement
+          echo "Lancement de Docker Compose..."
+          if ! docker compose up -d --build --force-recreate; then
+            echo "ERREUR : Échec du build Docker. Rollback vers $PREVIOUS_COMMIT..."
+            if [ -n "$PREVIOUS_COMMIT" ]; then
+              git reset --hard $PREVIOUS_COMMIT
+              docker compose up -d --build
+            fi
+            exit 1
+          fi
           
           # Fix Permissions & Folders
           docker compose exec -T --user root app mkdir -p storage/framework/views storage/framework/cache storage/framework/sessions bootstrap/cache
           docker compose exec -T --user root app chmod -R 777 storage bootstrap/cache
           docker compose exec -T --user root app chown -R www-data:www-data storage bootstrap/cache
           
-          # Optimisations Laravel (exécutées dans le container)
+          # Optimisations Laravel
           docker compose exec -T app php artisan storage:link --force
           docker compose exec -T app php artisan migrate --force
-          docker compose exec -T app php artisan db:seed --force
           docker compose exec -T app php artisan config:cache
           docker compose exec -T app php artisan route:cache
           docker compose exec -T app php artisan view:cache
           
-          # Nettoyage des images inutilisées pour libérer de l'espace
+          # Nettoyage
           docker image prune -f
           
-          echo "=========================================="
-          echo "VERIFICATION FINALE DU DEPLOIEMENT"
-          echo "=========================================="
-          echo "Chemin final sur le serveur :"
-          pwd
-          echo "------------------------------------------"
-          echo "Contenu du répertoire (fichiers créés) :"
-          ls -la
-          echo "=========================================="
+          # --- VERIFICATION DE SANTE (Healthcheck) ---
+          echo "Attente de la stabilisation des conteneurs (20s)..."
+          sleep 20
+          
+          echo "Vérification de l'URL : https://channelmarket.net"
+          # On vérifie si le site répond un code 200 ou 302 (OK)
+          HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" https://channelmarket.net)
+          
+          if [ "$HTTP_STATUS" -eq 200 ] || [ "$HTTP_STATUS" -eq 302 ]; then
+            echo "✅ Succès ! Le site répond avec le code $HTTP_STATUS."
+          else
+            echo "🚨 ERREUR CRITIQUE : Le site répond $HTTP_STATUS (404/500). Lancement du Rollback..."
+            if [ -n "$PREVIOUS_COMMIT" ]; then
+              git reset --hard $PREVIOUS_COMMIT
+              docker compose up -d --build
+              echo "Rollback effectué vers le commit $PREVIOUS_COMMIT."
+            fi
+            exit 1
+          fi
 
     - name: Notification Succès (Email)
       if: success()

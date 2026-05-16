@@ -51,13 +51,14 @@ class PaymentController extends Controller
             $redirectUrl = route('payment.chariow.return', ['order' => $order->id]).'?sale='.urlencode('{sale_id}');
 
             $paymentData = [
-                'product_id' => $productId,
-                'email' => $validated['email'],
-                'first_name' => $validated['first_name'],
-                'last_name' => $validated['last_name'],
-                'phone' => [
-                    'number' => $phone['number'],
-                    'country_code' => $phone['country_code'],
+                'amount' => $amount,
+                'currency' => $product->currency ?? 'XOF',
+                'description' => "Paiement pour la commande #{$order->id}",
+                'customer' => [
+                    'email' => $validated['email'],
+                    'first_name' => $validated['first_name'],
+                    'last_name' => $validated['last_name'],
+                    'phone' => $phone,
                 ],
                 'redirect_url' => $redirectUrl,
                 'custom_metadata' => [
