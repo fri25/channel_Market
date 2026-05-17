@@ -59,6 +59,10 @@ Route::middleware('auth')->group(function () {
 // chariow return URL
 Route::get('/payment/chariow/return/{order}', [PaymentController::class, 'chariowReturn'])->name('payment.chariow.return');
 
+// chariow webhook URL
+Route::post('/payment/chariow/webhook', [PaymentController::class, 'chariowWebhook'])
+    ->name('payment.chariow.webhook')
+    ->withoutMiddleware([VerifyCsrfToken::class]);
 
 // Payment success page (public fallback)
 Route::get('/payment/success/{order}', [PaymentController::class, 'success'])->name('payment.success');

@@ -21,6 +21,7 @@
         <env name="APP_ENV" value="testing"/>
         <env name="APP_URL" value="http://localhost"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <env name="APP_KEY" value="base64:fH7+X6mP1y9uY0r2v9cbYfyhe3VA/bdyJFI8rAg76NI="/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>

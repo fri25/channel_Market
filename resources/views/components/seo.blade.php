@@ -1,7 +1,7 @@
 @props([
     'title'       => null,
     'description' => 'Découvrez nos produits digitaux exclusifs sur Channel Market. PDF, vidéos, musiques, formations — qualité premium et téléchargement immédiat.',
-    'image'       => asset('images/og-image.jpg'),
+    'image'       => asset('img/logo.jpg'),
     'url'         => url()->current(),
     'type'        => 'website',
     'keywords'    => 'produits digitaux, marketplace, téléchargement, PDF, formations, Channel Market',
@@ -47,8 +47,8 @@
 <link rel="canonical" href="{{ $url }}">
 
 {{-- Favicon --}}
-<link rel="icon"             type="image/x-icon" href="{{ asset('favicon.ico') }}">
-<link rel="apple-touch-icon" sizes="180x180"     href="{{ asset('apple-touch-icon.png') }}">
+<link rel="icon"             type="image/jpeg"   href="{{ asset('img/logo.jpg') }}">
+<link rel="apple-touch-icon" sizes="180x180"     href="{{ asset('img/logo.jpg') }}">
 
 {{-- JSON-LD Structured Data --}}
 @php

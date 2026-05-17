@@ -48,7 +48,7 @@ class PaymentController extends Controller
 
         try {
             $productId = $this->resolveChariowProductId($product);
-            $redirectUrl = route('payment.chariow.return', ['order' => $order->id]).'?sale='.urlencode('{sale_id}');
+            $redirectUrl = rtrim(config('app.url'), '/') . route('payment.chariow.return', ['order' => $order->id], false);
 
             $paymentData = [
                 'product_id' => $productId,
@@ -121,14 +121,6 @@ class PaymentController extends Controller
      */
     public function chariowReturn(Request $request, Order $order)
     {
-        $saleId = $request->query('sale');
-
-        if (! $saleId) {
-            return redirect()
-                ->route('products.show', $order->product_id)
-                ->with('error', 'Retour paiement invalide.');
-        }
-
         if ($order->status === 'success') {
             if (auth()->check()) {
                 return redirect('/dashboard')
@@ -149,33 +141,40 @@ class PaymentController extends Controller
      */
     public function chariowWebhook(Request $request, chariowService $chariow)
     {
-        if (! $chariow->validateWebhook($request)) {
-            Log::error('chariow webhook: invalid signature');
-
-            return response()->json(['error' => 'Invalid signature'], 403);
-        }
-
         $payload = $request->json()->all();
-        $paymentId = $payload['data']['id'] ?? $payload['id'] ?? null;
-        $status = strtolower($payload['data']['status'] ?? $payload['status'] ?? '');
-        $metadata = $payload['data']['custom_metadata'] ?? $payload['custom_metadata'] ?? [];
-        $orderId = $metadata['order_id'] ?? null;
+        $event = $payload['event'] ?? '';
 
-        if (! $paymentId) {
-            return response()->json(['error' => 'Missing payment id'], 422);
-        }
+        if ($event === 'successful.sale' || $event === 'completed') {
+            $sale = $payload['sale'] ?? [];
+            $paymentId = $sale['id'] ?? null;
+            $status = strtolower($sale['status'] ?? '');
+            $metadata = $sale['custom_metadata'] ?? [];
+            $orderId = $metadata['order_id'] ?? null;
 
-        $order = $orderId ? Order::find($orderId) : Order::where('transaction_id', $paymentId)->first();
+            if (! $paymentId) {
+                return response()->json(['error' => 'Missing payment id'], 422);
+            }
 
-        if (! $order) {
-            Log::warning('chariow webhook: order not found', ['paymentId' => $paymentId]);
-            return response()->json(['ok' => true], 200);
-        }
+            $order = $orderId ? Order::find($orderId) : Order::where('transaction_id', $paymentId)->first();
 
-        if (in_array($status, ['success', 'paid', 'approved', 'completed'], true)) {
-            $order->update(['status' => 'success', 'transaction_id' => $paymentId]);
-        } elseif (in_array($status, ['failed', 'cancelled', 'refused', 'expired'], true)) {
-            $order->update(['status' => 'failed', 'transaction_id' => $paymentId]);
+            if (! $order) {
+                Log::warning('chariow webhook: order not found', ['paymentId' => $paymentId]);
+                return response()->json(['ok' => true], 200);
+            }
+
+            if (in_array($status, ['success', 'paid', 'approved', 'completed'], true)) {
+                $order->update(['status' => 'success', 'transaction_id' => $paymentId]);
+            }
+        } elseif ($event === 'failed.sale' || $event === 'abandoned.sale') {
+            $sale = $payload['sale'] ?? [];
+            $paymentId = $sale['id'] ?? null;
+            $metadata = $sale['custom_metadata'] ?? [];
+            $orderId = $metadata['order_id'] ?? null;
+
+            $order = $orderId ? Order::find($orderId) : Order::where('transaction_id', $paymentId)->first();
+            if ($order) {
+                $order->update(['status' => 'failed', 'transaction_id' => $paymentId]);
+            }
         }
 
         return response()->json(['ok' => true], 200);
@@ -217,7 +216,7 @@ class PaymentController extends Controller
 
     private function resolveChariowProductId(Product $product): string
     {
-        return $product->chariow_product_id ?? (string) $product->id;
+        return $product->chariow_product_id ?: config('services.chariow.generic_product_id', (string) $product->id);
     }
 
     /**

@@ -52,8 +52,7 @@
             <div class="card-premium">
                 <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data" class="p-8 sm:p-12" x-data="{ productType: 'file' }">
                     @csrf
-                    
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
                         <div class="space-y-8">
                             <div>
                                 <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-3">Titre du produit</label>
@@ -104,14 +103,15 @@
                                     </label>
                                 </div>
 
-                                <div x-show="productType === 'file'" x-transition>
+                                <div x-show="productType === 'file'" x-transition x-data="{ fileName: '' }">
                                     <div class="relative group">
-                                        <input type="file" name="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" :required="productType === 'file'">
-                                        <div class="border-2 border-dashed border-indigo-200 rounded-2xl p-8 text-center group-hover:bg-white group-hover:border-indigo-400 transition-all duration-300">
-                                            <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mx-auto mb-3">
-                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                        <input type="file" name="file" @change="fileName = $event.target.files[0]?.name" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" :required="productType === 'file'">
+                                        <div class="border-2 border-dashed border-indigo-200 rounded-2xl p-8 text-center group-hover:bg-white group-hover:border-indigo-400 transition-all duration-300" :class="fileName ? 'bg-white border-indigo-500' : ''">
+                                            <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" :class="fileName ? 'bg-green-100 text-green-600' : 'bg-indigo-100 text-indigo-600'">
+                                                <svg x-show="!fileName" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                                <svg x-cloak x-show="fileName" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                             </div>
-                                            <p class="text-sm font-bold text-slate-700">Télécharger le fichier</p>
+                                            <p class="text-sm font-bold text-slate-700" x-text="fileName ? fileName : 'Télécharger le fichier'"></p>
                                         </div>
                                     </div>
                                     @error('file') <span class="text-rose-500 text-xs font-bold mt-2 block">{{ $message }}</span> @enderror
@@ -124,16 +124,29 @@
                                 </div>
                             </div>
 
-                            <div>
+                            <div x-data="{ fileName: '' }">
                                 <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-3">Image de présentation (Obligatoire)</label>
-                                <div class="space-y-4">
-                                    <input type="file" name="image_file" required class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-slate-900 file:text-white hover:file:bg-slate-800 cursor-pointer transition shadow-lg shadow-slate-900/10">
+                                <div class="relative group">
+                                    <input type="file" name="image_file" @change="fileName = $event.target.files[0]?.name" required accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                    <div class="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center group-hover:bg-slate-50 group-hover:border-slate-300 transition-all duration-300" :class="fileName ? 'bg-slate-50 border-slate-400' : ''">
+                                        <p class="text-sm font-bold text-slate-600" x-text="fileName ? fileName : 'Sélectionner une image'"></p>
+                                    </div>
                                 </div>
                                 @error('image_file') <p class="text-rose-500 text-xs font-bold mt-2 block">{{ $message }}</p> @enderror
                             </div>
+
+                            <div x-data="{ fileCount: 0 }">
+                                <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-3">Témoignages / Preuves sociales (Optionnel)</label>
+                                <div class="relative group">
+                                    <input type="file" name="testimonials_files[]" @change="fileCount = $event.target.files.length" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                    <div class="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center group-hover:bg-slate-50 group-hover:border-slate-300 transition-all duration-300" :class="fileCount > 0 ? 'bg-amber-50 border-amber-300' : ''">
+                                        <p class="text-sm font-bold text-slate-600" x-text="fileCount > 0 ? fileCount + ' image(s) sélectionnée(s)' : 'Ajouter des captures d\'écran'"></p>
+                                    </div>
+                                </div>
+                                @error('testimonials_files.*') <p class="text-rose-500 text-xs font-bold mt-2 block">{{ $message }}</p> @enderror
+                            </div>
                         </div>
                     </div>
-
 
                     <div class="flex items-center justify-end gap-4 mt-12 pt-8 border-t border-slate-50">
                         <a href="{{ route('admin.products.index') }}" class="font-bold text-slate-400 hover:text-slate-600 transition-colors px-6">Annuler</a>

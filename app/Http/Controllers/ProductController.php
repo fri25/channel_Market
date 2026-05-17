@@ -60,6 +60,7 @@ class ProductController extends Controller
             'drive_link' => 'required_if:product_type,link|nullable|url',
             'image_file' => 'required|image|max:2048',
             'chariow_product_id' => 'nullable|string|max:255',
+            'testimonials_files.*' => 'nullable|image|max:2048',
         ]);
 
         $filePath = null;
@@ -71,6 +72,13 @@ class ProductController extends Controller
 
         $imagePath = $request->file('image_file')->store('products', 'public');
 
+        $testimonials = [];
+        if ($request->hasFile('testimonials_files')) {
+            foreach ($request->file('testimonials_files') as $file) {
+                $testimonials[] = $file->store('testimonials', 'public');
+            }
+        }
+
         Product::create([
             'title' => $validated['title'],
             'description' => $validated['description'],
@@ -78,6 +86,7 @@ class ProductController extends Controller
             'file_path' => $filePath,
             'image' => $imagePath,
             'chariow_product_id' => $validated['chariow_product_id'] ?? null,
+            'testimonials' => $testimonials,
         ]);
 
         return redirect()->route('admin.products.index')->with('success', 'Produit créé avec succès !');
@@ -107,6 +116,7 @@ class ProductController extends Controller
             'drive_link' => 'required_if:product_type,link|nullable|url',
             'image_file' => 'nullable|image|max:2048',
             'chariow_product_id' => 'nullable|string|max:255',
+            'testimonials_files.*' => 'nullable|image|max:2048',
         ]);
 
         // Handle digital product file/link
@@ -132,6 +142,15 @@ class ProductController extends Controller
                 Storage::disk('public')->delete($product->image);
             }
             $product->image = $request->file('image_file')->store('products', 'public');
+        }
+
+        // Handle testimonials
+        if ($request->hasFile('testimonials_files')) {
+            $testimonials = $product->testimonials ?? [];
+            foreach ($request->file('testimonials_files') as $file) {
+                $testimonials[] = $file->store('testimonials', 'public');
+            }
+            $product->testimonials = $testimonials;
         }
 
         $product->title = $validated['title'];
