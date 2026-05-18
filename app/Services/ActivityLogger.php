@@ -46,8 +46,8 @@ class ActivityLogger
                 'user_id' => auth()->id(),
                 'action' => $action,
                 'description' => $description,
-                'old_values' => !empty($oldValues) ? $oldValues : null,
-                'new_values' => !empty($newValues) ? $newValues : null,
+                'old_values' => ! empty($oldValues) ? $oldValues : null,
+                'new_values' => ! empty($newValues) ? $newValues : null,
                 'ip_address' => Request::ip(),
             ]);
 
@@ -55,9 +55,9 @@ class ActivityLogger
             $adminEmails = ['elfridayemadje5@gmail.com', 'digitaleflex@gmail.com'];
             Mail::to($adminEmails)->send(new AdminActivityAlertMail($log));
         } catch (\Throwable $e) {
-            Log::error('ActivityLogger failed: ' . $e->getMessage(), [
+            Log::error('ActivityLogger failed: '.$e->getMessage(), [
                 'action' => $action,
-                'description' => $description
+                'description' => $description,
             ]);
         }
     }

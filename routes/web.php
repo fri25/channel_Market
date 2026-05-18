@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
@@ -10,7 +11,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingController;
 use App\Models\Order;
 use App\Models\Product;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -59,7 +59,6 @@ Route::middleware('auth')->group(function () {
 // chariow return URL
 Route::get('/payment/chariow/return/{order}', [PaymentController::class, 'chariowReturn'])->name('payment.chariow.return');
 
-
 // Payment success page (public fallback)
 Route::get('/payment/success/{order}', [PaymentController::class, 'success'])->name('payment.success');
 
@@ -82,7 +81,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
 
-    Route::get('/activity', [\App\Http\Controllers\ActivityController::class, 'index'])->name('activity.index');
+    Route::get('/activity', [ActivityController::class, 'index'])->name('activity.index');
 });
 
 require __DIR__.'/auth.php';

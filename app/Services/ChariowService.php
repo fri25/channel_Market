@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 class ChariowService
 {
     protected string $apiKey = '';
+
     protected string $apiUrl = '';
 
     public function __construct()

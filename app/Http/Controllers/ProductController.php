@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -80,7 +81,7 @@ class ProductController extends Controller
             'chariow_product_id' => $validated['chariow_product_id'] ?? null,
         ]);
 
-        \App\Services\ActivityLogger::log('product_created', "Création du produit : {$product->title}", $product);
+        ActivityLogger::log('product_created', "Création du produit : {$product->title}", $product);
 
         return redirect()->route('admin.products.index')->with('success', 'Produit créé avec succès !');
     }
@@ -143,7 +144,7 @@ class ProductController extends Controller
 
         $product->save();
 
-        \App\Services\ActivityLogger::log('product_updated', "Modification du produit : {$product->title}", $product);
+        ActivityLogger::log('product_updated', "Modification du produit : {$product->title}", $product);
 
         return redirect()->route('admin.products.index')->with('success', 'Produit mis à jour avec succès !');
     }
@@ -192,7 +193,7 @@ class ProductController extends Controller
         $productTitle = $product->title;
         $product->delete();
 
-        \App\Services\ActivityLogger::log('product_deleted', "Suppression du produit : {$productTitle}");
+        ActivityLogger::log('product_deleted', "Suppression du produit : {$productTitle}");
 
         return redirect()->route('admin.products.index')->with('success', 'Produit supprimé avec succès !');
     }

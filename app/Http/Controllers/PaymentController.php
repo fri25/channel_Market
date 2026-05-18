@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Services\ActivityLogger;
 use App\Services\chariowService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -76,6 +77,7 @@ class PaymentController extends Controller
 
             if ($step === 'payment' && $paymentUrl) {
                 $order->update(['transaction_id' => $transactionId]);
+
                 return redirect()->away($paymentUrl);
             }
 
@@ -85,7 +87,7 @@ class PaymentController extends Controller
                     'transaction_id' => $transactionId,
                 ]);
 
-                \App\Services\ActivityLogger::log('order_success', "Nouvelle vente de {$order->amount} CFA pour le produit : {$order->product->title}", $order);
+                ActivityLogger::log('order_success', "Nouvelle vente de {$order->amount} CFA pour le produit : {$order->product->title}", $order);
 
                 if (auth()->check()) {
                     return redirect('/dashboard')
@@ -172,13 +174,14 @@ class PaymentController extends Controller
 
         if (! $order) {
             Log::warning('chariow webhook: order not found', ['paymentId' => $paymentId]);
+
             return response()->json(['ok' => true], 200);
         }
 
         if (in_array($status, ['success', 'paid', 'approved', 'completed'], true)) {
             if ($order->status !== 'success') {
                 $order->update(['status' => 'success', 'transaction_id' => $paymentId]);
-                \App\Services\ActivityLogger::log('order_success', "Nouvelle vente de {$order->amount} CFA pour le produit : {$order->product->title}", $order);
+                ActivityLogger::log('order_success', "Nouvelle vente de {$order->amount} CFA pour le produit : {$order->product->title}", $order);
             }
         } elseif (in_array($status, ['failed', 'cancelled', 'refused', 'expired'], true)) {
             $order->update(['status' => 'failed', 'transaction_id' => $paymentId]);

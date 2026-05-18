@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Setting;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 
 class SettingController extends Controller
@@ -47,7 +48,7 @@ class SettingController extends Controller
             );
 
             if ($oldValue !== $value) {
-                \App\Services\ActivityLogger::log('setting_updated', "Modification du paramètre {$settingKey} : " . ($oldValue ?? 'Non défini') . " -> " . ($value ?? 'Non défini'));
+                ActivityLogger::log('setting_updated', "Modification du paramètre {$settingKey} : ".($oldValue ?? 'Non défini').' -> '.($value ?? 'Non défini'));
             }
         }
 

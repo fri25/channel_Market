@@ -33,12 +33,12 @@ class AdminActivityAlertMail extends Mailable
             'product_updated' => '🔄',
             'product_deleted' => '❌',
             'setting_updated' => '⚙️',
-            'order_success'   => '💰',
-            default            => '🔔',
+            'order_success' => '💰',
+            default => '🔔',
         };
 
         return new Envelope(
-            subject: "{$emoji} NOTIFICATION ADMIN : " . $this->log->description,
+            subject: "{$emoji} NOTIFICATION ADMIN : ".$this->log->description,
         );
     }
 
