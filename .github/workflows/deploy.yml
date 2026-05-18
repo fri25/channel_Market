@@ -48,6 +48,9 @@ jobs:
           fi
           
           # Tentative de déploiement
+          echo "Nettoyage des conteneurs arrêtés ou en conflit..."
+          docker container prune -f
+
           echo "Lancement de Docker Compose..."
           if ! docker compose up -d --build --force-recreate; then
             echo "ERREUR : Échec du build Docker. Rollback vers $PREVIOUS_COMMIT..."
