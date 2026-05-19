@@ -47,8 +47,8 @@
 <link rel="canonical" href="{{ $url }}">
 
 {{-- Favicon --}}
-<link rel="icon"             type="image/x-icon" href="{{ asset('favicon.ico') }}">
-<link rel="apple-touch-icon" sizes="180x180"     href="{{ asset('apple-touch-icon.png') }}">
+<link rel="icon"             type="image/jpeg"   href="{{ asset('img/logo.jpg') }}">
+<link rel="apple-touch-icon"                     href="{{ asset('img/logo.jpg') }}">
 
 {{-- JSON-LD Structured Data --}}
 @php
