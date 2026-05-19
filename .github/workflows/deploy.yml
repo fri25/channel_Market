@@ -2,7 +2,7 @@ name: Deployment
 
 on:
   push:
-    branches: [ "master", "main"]
+    branches: [ "master" ]
 
 jobs:
   deploy:
@@ -43,15 +43,15 @@ jobs:
           PREVIOUS_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "")
           echo "Dernier commit stable : $PREVIOUS_COMMIT"
 
-          # Mise à jour du code dynamique par rapport à la branche active
+          # Mise à jour du code depuis la branche master (unique source de vérité)
           if [ ! -d ".git" ]; then
             echo "Premier déploiement : Clonage du projet..."
             git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git .
             git remote set-url origin https://github.com/${{ github.repository }}.git
           else
-            echo "Mise à jour du code existant pour la branche ${{ github.ref_name }}..."
+            echo "Mise à jour du code existant pour la branche master..."
             git fetch origin
-            git reset --hard origin/${{ github.ref_name }}
+            git reset --hard origin/master
           fi
           
           # Nettoyage et arrêt propre pour éviter les conflits de conteneurs orphelins
