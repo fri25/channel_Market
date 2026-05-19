@@ -30,7 +30,7 @@ class OrderConfirmationMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Confirmation de commande - ' . config('app.name'),
+            subject: 'Confirmation de commande - '.config('app.name'),
         );
     }
 

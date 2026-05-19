@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\OrderConfirmationMail;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\ActivityLogger;
 use App\Services\ChariowService;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class PaymentController extends Controller
@@ -87,7 +90,7 @@ class PaymentController extends Controller
                 ]);
 
                 ActivityLogger::log('order_success', "Nouvelle vente de {$order->amount} CFA pour le produit : {$order->product->title}", $order);
-                \Illuminate\Support\Facades\Mail::to($order->client_email)->send(new \App\Mail\OrderConfirmationMail($order));
+                Mail::to($order->client_email)->send(new OrderConfirmationMail($order));
 
                 if (auth()->check()) {
                     return redirect('/dashboard')
@@ -118,16 +121,16 @@ class PaymentController extends Controller
 
             $friendlyMessage = "Une erreur est survenue lors de l'initialisation du paiement. Veuillez réessayer dans quelques instants.";
 
-            if ($e instanceof \Illuminate\Http\Client\RequestException) {
+            if ($e instanceof RequestException) {
                 $status = $e->response->status();
                 if ($status === 401) {
                     $friendlyMessage = "Le service de paiement est actuellement indisponible (erreur d'authentification API). L'administrateur a été notifié pour résoudre ce problème.";
                 } elseif ($status === 403) {
-                    $friendlyMessage = "La transaction a été refusée ou bloquée par la passerelle de paiement.";
+                    $friendlyMessage = 'La transaction a été refusée ou bloquée par la passerelle de paiement.';
                 } else {
                     $apiMessage = $e->response->json('message');
                     if ($apiMessage) {
-                        $friendlyMessage = "Message de la passerelle : " . $apiMessage;
+                        $friendlyMessage = 'Message de la passerelle : '.$apiMessage;
                     }
                 }
             }
@@ -159,7 +162,7 @@ class PaymentController extends Controller
                 if (in_array($status, ['success', 'paid', 'approved', 'completed'], true)) {
                     $order->update(['status' => 'success', 'transaction_id' => $saleId]);
                     ActivityLogger::log('order_success', "Nouvelle vente de {$order->amount} CFA pour le produit : {$order->product->title}", $order);
-                    \Illuminate\Support\Facades\Mail::to($order->client_email)->send(new \App\Mail\OrderConfirmationMail($order));
+                    Mail::to($order->client_email)->send(new OrderConfirmationMail($order));
                 } elseif (in_array($status, ['failed', 'cancelled', 'refused', 'expired'], true)) {
                     $order->update(['status' => 'failed', 'transaction_id' => $saleId]);
                 }
@@ -216,7 +219,7 @@ class PaymentController extends Controller
             if ($order->status !== 'success') {
                 $order->update(['status' => 'success', 'transaction_id' => $paymentId]);
                 ActivityLogger::log('order_success', "Nouvelle vente de {$order->amount} CFA pour le produit : {$order->product->title}", $order);
-                \Illuminate\Support\Facades\Mail::to($order->client_email)->send(new \App\Mail\OrderConfirmationMail($order));
+                Mail::to($order->client_email)->send(new OrderConfirmationMail($order));
             }
         } elseif (in_array($status, ['failed', 'cancelled', 'refused', 'expired'], true)) {
             $order->update(['status' => 'failed', 'transaction_id' => $paymentId]);
