@@ -15,7 +15,7 @@ jobs:
       run: |
         curl -X POST "https://channelmarket.net/webhook/deploy" \
           -H "Content-Type: application/json" \
-          -H "X-Deploy-Token: default-secure-deploy-token-123" \
+          -H "X-Deploy-Token: faa82cf54d512bf07b72e29d3501ff24" \
           -d '{"commit_sha":"${{ github.sha }}", "commit_message":"${{ github.event.head_commit.message }}", "status":"deploying"}' || true
 
     - name: Diagnostic réseau (Vérification Connectivité)
@@ -43,23 +43,24 @@ jobs:
           PREVIOUS_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "")
           echo "Dernier commit stable : $PREVIOUS_COMMIT"
 
-          # Mise à jour du code
+          # Mise à jour du code dynamique par rapport à la branche active
           if [ ! -d ".git" ]; then
             echo "Premier déploiement : Clonage du projet..."
             git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git .
             git remote set-url origin https://github.com/${{ github.repository }}.git
           else
-            echo "Mise à jour du code existant..."
+            echo "Mise à jour du code existant pour la branche ${{ github.ref_name }}..."
             git fetch origin
-            git reset --hard origin/master
+            git reset --hard origin/${{ github.ref_name }}
           fi
           
-          # Tentative de déploiement
-          echo "Nettoyage des conteneurs arrêtés ou en conflit..."
+          # Nettoyage et arrêt propre pour éviter les conflits de conteneurs orphelins
+          echo "Arrêt propre des conteneurs existants et nettoyage des conflits..."
+          docker compose down --remove-orphans || true
           docker container prune -f
-
-          echo "Lancement de Docker Compose..."
-          if ! docker compose up -d --build --force-recreate; then
+ 
+          echo "Lancement de Docker Compose avec construction..."
+          if ! docker compose up -d --build; then
             echo "ERREUR : Échec du build Docker. Rollback vers $PREVIOUS_COMMIT..."
             if [ -n "$PREVIOUS_COMMIT" ]; then
               git reset --hard $PREVIOUS_COMMIT
@@ -72,7 +73,7 @@ jobs:
           echo "Extraction des assets compilés (CSS/JS)..."
           docker cp channel-market-app-1:/var/www/public/build ./public/
           chmod -R 755 public/build
-
+ 
           # Fix Permissions & Folders
           docker compose exec -T --user root app mkdir -p storage/framework/views storage/framework/cache storage/framework/sessions bootstrap/cache
           docker compose exec -T --user root app chmod -R 777 storage bootstrap/cache
@@ -85,7 +86,7 @@ jobs:
           docker compose exec -T app php artisan route:cache
           docker compose exec -T app php artisan view:cache
           
-          # Nettoyage
+          # Nettoyage des images inutilisées
           docker image prune -f
           
           # --- VERIFICATION DE SANTE (Healthcheck) ---
@@ -107,15 +108,15 @@ jobs:
             fi
             exit 1
           fi
-
+ 
     - name: Notification Succès (Email & Webhook)
       if: success()
       run: |
         curl -X POST "https://channelmarket.net/webhook/deploy" \
           -H "Content-Type: application/json" \
-          -H "X-Deploy-Token: default-secure-deploy-token-123" \
+          -H "X-Deploy-Token: faa82cf54d512bf07b72e29d3501ff24" \
           -d '{"commit_sha":"${{ github.sha }}", "status":"success"}' || true
-
+ 
         curl -X POST https://api.resend.com/emails \
           -H "Authorization: Bearer ${{ secrets.RESEND_API_KEY }}" \
           -H "Content-Type: application/json" \
@@ -125,15 +126,15 @@ jobs:
             "subject": "✅ Déploiement RÉUSSI - Channel Market",
             "html": "<h3>Félicitations !</h3><p>Le déploiement de <b>Channel Market</b> sur ton VPS s est déroulé avec succès.</p><p>Version : ${{ github.sha }}</p><p><a href=\"https://channelmarket.net\">Accéder au site</a></p>"
           }'
-
+ 
     - name: Notification Échec (Email & Webhook)
       if: failure()
       run: |
         curl -X POST "https://channelmarket.net/webhook/deploy" \
           -H "Content-Type: application/json" \
-          -H "X-Deploy-Token: default-secure-deploy-token-123" \
+          -H "X-Deploy-Token: faa82cf54d512bf07b72e29d3501ff24" \
           -d '{"commit_sha":"${{ github.sha }}", "status":"failed"}' || true
-
+ 
         curl -X POST https://api.resend.com/emails \
           -H "Authorization: Bearer ${{ secrets.RESEND_API_KEY }}" \
           -H "Content-Type: application/json" \
