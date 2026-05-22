@@ -11,7 +11,7 @@
         "laravel/tinker": "^2.10.1",
         "masbug/flysystem-google-drive-ext": "^2.5",
         "resend/resend-laravel": "*",
-        "spatie/laravel-backup": "^10.2",
+        "spatie/laravel-backup": "^10.1",
         "symfony/resend-mailer": "^7.4"
     },
     "require-dev": {
