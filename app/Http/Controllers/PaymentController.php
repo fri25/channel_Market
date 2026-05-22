@@ -113,7 +113,7 @@ class PaymentController extends Controller
 
             return redirect()
                 ->route('checkout', $product)
-                ->with('error', "Erreur lors de l'initialisation du paiement : " . $e->getMessage());
+                ->with('error', "Erreur lors de l'initialisation du paiement : ".$e->getMessage());
         }
     }
 
@@ -193,7 +193,7 @@ class PaymentController extends Controller
             if (preg_match('/^\+([0-9]{1,3})/', $trimmed, $matches)) {
                 $dialCode = $matches[1];
                 $countryCode = $this->countryCodeFromDialCode($dialCode) ?? $countryCode;
-                $nationalNumber = preg_replace('/^' . preg_quote($dialCode, '/') . '/', '', $digits);
+                $nationalNumber = preg_replace('/^'.preg_quote($dialCode, '/').'/', '', $digits);
             }
         }
 
