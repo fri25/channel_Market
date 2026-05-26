@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -82,6 +83,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 
     Route::get('/orders', [OrderController::class, 'adminIndex'])->name('orders.index');
+    Route::get('/activity', [ActivityController::class, 'index'])->name('activity.index');
+    Route::get('/workflows', [ActivityController::class, 'workflows'])->name('workflows.index');
 
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');

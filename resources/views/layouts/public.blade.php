@@ -162,15 +162,6 @@
                         <li><a href="{{ route('login') }}" class="text-slate-600 hover:text-amber-600 transition-colors text-sm font-bold">Connexion</a></li>
                     </ul>
                 </div>
-
-                <div class="md:col-span-3">
-                    <h4 class="font-black text-slate-900 mb-8 uppercase text-xs tracking-[0.2em]">Support</h4>
-                    <ul class="space-y-4">
-                        <li><a href="#" class="text-slate-600 hover:text-amber-600 transition-colors text-sm font-bold">Centre d'aide</a></li>
-                        <li><a href="mailto:mahougnonbalaam@gmail.com" class="text-slate-600 hover:text-amber-600 transition-colors text-sm font-bold">Addresse mail</a></li>
-                        </div>
-                    </ul>
-                </div>
             </div>
             
             <div class="mt-20 pt-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
