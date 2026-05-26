@@ -167,9 +167,7 @@
                     <h4 class="font-black text-slate-900 mb-8 uppercase text-xs tracking-[0.2em]">Support</h4>
                     <ul class="space-y-4">
                         <li><a href="#" class="text-slate-600 hover:text-amber-600 transition-colors text-sm font-bold">Centre d'aide</a></li>
-                        <li><a href="" class="text-slate-600 hover:text-amber-600 transition-colors text-sm font-bold">+22969573488</a></li>
-                        <div class="mb-8 space-y-3 text-slate-600 text-sm font-medium">
-                        <li><a href="mailto:mahougnonbalaam@gmail.com" class="text-slate-600 hover:text-amber-600 transition-colors text-sm font-bold">mahougnonbalaam@gmail.com</a></li>
+                        <li><a href="mailto:mahougnonbalaam@gmail.com" class="text-slate-600 hover:text-amber-600 transition-colors text-sm font-bold">Addresse mail</a></li>
                         </div>
                     </ul>
                 </div>
