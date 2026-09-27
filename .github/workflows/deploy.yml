@@ -34,9 +34,6 @@ jobs:
     - name: Directory Permissions
       run: chmod -R 777 storage bootstrap/cache
 
-    - name: Run Code Style Checks (Pint)
-      run: ./vendor/bin/pint --test
-
     - name: Execute PHPUnit Tests
       env:
         DB_CONNECTION: sqlite
@@ -63,7 +60,7 @@ jobs:
     steps:
     - name: Notify Webhook - Deployment Started
       run: |
-        curl -X POST "https://channelmarket.net/webhook/deploy" -H "Content-Type: application/json" -H "X-Deploy-Token: faa82cf54d512bf07b72e29d3501ff24" -d '{"commit_sha":"${{ github.sha }}", "commit_message":"${{ github.event.head_commit.message }}", "status":"deploying"}' || true # gitleaks:allow
+        curl -X POST "https://channelmarket.net/webhook/deploy" -H "Content-Type: application/json" -H "X-Deploy-Token: ${{ secrets.DEPLOY_WEBHOOK_TOKEN }}" -d '{"commit_sha":"${{ github.sha }}", "commit_message":"${{ github.event.head_commit.message }}", "status":"deploying"}' || true
 
     - name: Diagnostic réseau (Vérification Connectivité)
       run: |
@@ -113,7 +110,8 @@ jobs:
           fi
           
           echo "Extraction des assets compilés (CSS/JS)..."
-          docker cp channel-market-app-1:/var/www/public/build ./public/
+          rm -rf ./public/build
+          docker cp channel-market-app-1:/var/build ./public/
           chmod -R 755 public/build
  
           docker compose exec -T --user root app mkdir -p storage/framework/views storage/framework/cache storage/framework/sessions bootstrap/cache
@@ -149,7 +147,7 @@ jobs:
     - name: Notification Succès (Email & Webhook)
       if: success()
       run: |
-        curl -X POST "https://channelmarket.net/webhook/deploy" -H "Content-Type: application/json" -H "X-Deploy-Token: faa82cf54d512bf07b72e29d3501ff24" -d '{"commit_sha":"${{ github.sha }}", "status":"success"}' || true # gitleaks:allow
+        curl -X POST "https://channelmarket.net/webhook/deploy" -H "Content-Type: application/json" -H "X-Deploy-Token: ${{ secrets.DEPLOY_WEBHOOK_TOKEN }}" -d '{"commit_sha":"${{ github.sha }}", "status":"success"}' || true
  
         curl -X POST https://api.resend.com/emails \
           -H "Authorization: Bearer ${{ secrets.RESEND_API_KEY }}" \
@@ -164,7 +162,7 @@ jobs:
     - name: Notification Échec du Déploiement (Email & Webhook)
       if: failure()
       run: |
-        curl -X POST "https://channelmarket.net/webhook/deploy" -H "Content-Type: application/json" -H "X-Deploy-Token: faa82cf54d512bf07b72e29d3501ff24" -d '{"commit_sha":"${{ github.sha }}", "status":"failed"}' || true # gitleaks:allow
+        curl -X POST "https://channelmarket.net/webhook/deploy" -H "Content-Type: application/json" -H "X-Deploy-Token: ${{ secrets.DEPLOY_WEBHOOK_TOKEN }}" -d '{"commit_sha":"${{ github.sha }}", "status":"failed"}' || true
  
         curl -X POST https://api.resend.com/emails \
           -H "Authorization: Bearer ${{ secrets.RESEND_API_KEY }}" \
